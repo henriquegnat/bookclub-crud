@@ -143,15 +143,20 @@ function alterar(indice) {
     listar();
 }
 
+// funcao que carrega os usuarios do localstorage e monta o select na tela
 function carregarUsuario() {
+    // busca a lista de usuarios salvos no localstorage; se nao tiver nenhum, cria uma lista vazia
     let lista = JSON.parse(localStorage.getItem("usuarios")) || [];
 
-    // monta o html do select com os nomes dos usuarios
+    // monta o html das opcoes do select com os nomes dos usuarios
     let options = "";
+
+    // passa de usuario em usuario montando a tag <option> para cada um
     for (let usuario of lista) {
+        // monta a tag <option> com o nome do usuario como valor e texto
         options += `<option value="${usuario.nome}">${usuario.nome}</option>`;
     }
 
-    // coloca o html dentro do select na tela
+    // adiciona as opcoes dentro do select na tela
     document.getElementById("inputUsuario").innerHTML += options;
 }
