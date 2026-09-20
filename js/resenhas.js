@@ -1,6 +1,7 @@
 // espera a pagina carregar todo o html antes de rodar a funcao listar
 document.addEventListener("DOMContentLoaded", function () {
     listar();
+    carregarUsuario();
 });
 
 // funcao chamada quando o usuario clica no botao "enviar"
@@ -140,4 +141,17 @@ function alterar(indice) {
 
     // recarrega a lista para mostrar a resenha ja atualizada
     listar();
+}
+
+function carregarUsuario() {
+    let lista = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+    // monta o html do select com os nomes dos usuarios
+    let options = "";
+    for (let usuario of lista) {
+        options += `<option value="${usuario.nome}">${usuario.nome}</option>`;
+    }
+
+    // coloca o html dentro do select na tela
+    document.getElementById("inputUsuario").innerHTML += options;
 }
