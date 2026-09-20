@@ -33,11 +33,11 @@ O projeto conecta diretamente o modelo conceitual desenvolvido na disciplina de 
 
 | Módulo / CRUD | Entidade | Responsável | Descrição |
 | :--- | :---: | :---: | :--- |
-| **1. Gêneros Literários** | `GENERO` | *Julia Moura Ruela* | Cadastro e categorização de gêneros (Fantasia, Ficção, Romance, etc.). |
-| **2. Leitores (Usuários)** | `USUARIO` | *Yasmin Luz de Araújo* | Gestão de perfis de leitores, e-mails e metas anuais de leitura. |
-| **3. Catálogo de Livros** | `LIVRO` | *Leticia Hellen Prata de Souza* | Gerenciamento de acervo com título, autor, gênero, páginas e ano de publicação. |
+| **1. Gêneros Literários** | `GENERO` | *Julia Moura Ruela* | CRUD e categorização de gêneros (Fantasia, Ficção, Romance, etc.). |
+| **2. Leitores (Usuários)** | `USUARIO` | *Yasmin Luz de Araújo* | CRUD de perfis de leitores, e-mails e metas anuais de leitura. |
+| **3. Catálogo de Livros** | `LIVRO` | *Leticia Hellen Prata de Souza* | CRUD de livros de acervo com título, autor, gênero, páginas e ano de publicação. |
 | **4. Clubes de Leitura** | `CLUBE` | *Sabrina Bernardi Ferreira* | Administração de círculos literários, capacidade de membros e status de atividade. |
-| **5. Avaliações & Resenhas**| `RESENHA` | *Henrique Gnatkovski de Almeida* | Publicação de resenhas críticas, notas avaliativas (1 a 5) e recomendações. |
+| **5. Avaliações & Resenhas**| `RESENHA` | *Henrique Gnatkovski de Almeida* | CRUD de resenhas críticas, com usuário, livro, nota e spoiler|
 
 ---
 
