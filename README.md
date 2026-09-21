@@ -1,4 +1,4 @@
-﻿# 📚 BookClub — Plataforma de Gestão Literária e Comunidade de Leitura
+# 📚 BookClub — Plataforma de Gestão Literária e Comunidade de Leitura
 
 > **Atividade Prática – Desenvolvimento de Aplicação Web**  
 > Aplicação dos conceitos de front-end e operações fundamentais de CRUD utilizando o `LocalStorage` do navegador para persistência de dados.
@@ -36,7 +36,7 @@ O projeto conecta diretamente o modelo conceitual desenvolvido na disciplina de 
 | **1. Gêneros Literários** | `GENERO` | *Julia Moura Ruela* | CRUD e categorização de gêneros (Fantasia, Ficção, Romance, etc.). |
 | **2. Leitores (Usuários)** | `USUARIO` | *Yasmin Luz de Araújo* | CRUD de perfis de leitores, e-mails e metas anuais de leitura. |
 | **3. Catálogo de Livros** | `LIVRO` | *Leticia Hellen Prata de Souza* | CRUD de livros de acervo com título, autor, gênero, páginas e ano de publicação. |
-| **4. Clubes de Leitura** | `CLUBE` | *Sabrina Bernardi Ferreira* | Administração de círculos literários, capacidade de membros e status de atividade. |
+| **4. Clubes de Leitura** | `CLUBE` | *Sabrina Bernardi Ferreira* | CRUD de clubes de leitura com nome, tema e status de atividade. |
 | **5. Avaliações & Resenhas**| `RESENHA` | *Henrique Gnatkovski de Almeida* | CRUD de resenhas críticas, com usuário, livro, nota e spoiler|
 
 ---
@@ -56,8 +56,8 @@ O projeto conecta diretamente o modelo conceitual desenvolvido na disciplina de 
 * **Funcionalidade**: Cadastro central de títulos literários que alimentam as discussões dos clubes e as avaliações.
 
 ### 👥 Módulo 4: Clubes de Leitura (`CLUBE`)
-* **Campos**: `id`, `nome_clube`, `tema`, `capacidade_max`, `status` (Ativo/Em Pausa/Encerrado), `data_criacao`
-* **Funcionalidade**: Criação e gestão de grupos temáticos com controle de capacidade e acompanhamento de status.
+* **Campos**: `id`, `nome_clube`, `tema`, `status` (Ativo/Em Pausa/Encerrado)
+* **Funcionalidade**: Criação e gestão de grupos temáticos com acompanhamento de status.
 
 ### ⭐ Módulo 5: Avaliações & Resenhas (`RESENHA`)
 * **Campos**: `id`, `livro`, `leitor`, `nota` (1 a 5), `texto_resenha`, `recomenda` (Sim/Não)
