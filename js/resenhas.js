@@ -106,6 +106,10 @@ function excluir(indice) {
 
     // mensagem de confirmacao para o usuario
     alert("Resenha excluída com sucesso!");
+
+    // habilita o botao de enviar para criar novas resenhas
+    document.getElementById("btnEnviar").disabled = false;
+
 }
 
 // funcao que carrega os dados da resenha de volta nos campos para o usuario poder editar
@@ -118,6 +122,8 @@ function carregar(indice) {
     document.getElementById("inputResenha").value = lista[indice].resenha;
     document.getElementById("inputNota").value = lista[indice].nota;
     document.getElementById("inputSpoiler").checked = lista[indice].spoiler;
+
+    document.getElementById("btnEnviar").disabled = true; // desabilita o botao de enviar para nao criar uma nova resenha enquanto edita
 
     // cria dinamicamente o botao amarelo para confirmar a alteracao daquela posicao
     document.getElementById("alterar").innerHTML = `<button class="btn btn-warning w-100 mb-2" onclick="alterar(${indice})">Salvar Alteração</button>`;
@@ -152,6 +158,9 @@ function alterar(indice) {
     document.getElementById("inputResenha").value = "";
     document.getElementById("inputNota").value = "";
     document.getElementById("inputSpoiler").checked = false;
+    
+    // habilita o botao de enviar para criar novas resenhas
+    document.getElementById("btnEnviar").disabled = false;
     
     // recarrega a lista para mostrar a resenha ja atualizada
     listar();
@@ -200,6 +209,9 @@ function cancelar() {
     // limpa os botoes de alterar e cancelar da tela
     document.getElementById("alterar").innerHTML = "";
     document.getElementById("cancelar").innerHTML = "";
+
+    // habilita novamente o botao de enviar para criar novas resenhas
+    document.getElementById("btnEnviar").disabled = false; 
 
     // recarrega a lista de resenhas para mostrar a tela original
     listar();
