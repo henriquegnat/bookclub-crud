@@ -29,6 +29,10 @@
             filter: blur(0);
             user-select: auto;
         }
+
+        body{
+            margin-bottom: 50px;
+        }
     </style>
 </head>
 
@@ -53,7 +57,7 @@
     <!-- container principal que centraliza todo o conteudo na tela com largura maxima -->
     <div class="container" style="max-width: 650px;">
         <!-- titulo da pagina -->
-        <h2 class="mb-4 text-center">BookClub - Resenhas</h2>
+        <h2 class="mb-4 text-center">Resenhas</h2>
 
         <!-- caixinha branca (card) com sombra que guarda o formulario -->
         <div class="card p-4 shadow-sm mb-4">
@@ -72,9 +76,6 @@
                 <label for="inputLivro" class="form-label fw-bold">Livro</label>
                 <select id="inputLivro" class="form-select" required>
                     <option value="" disabled selected>Selecione um livro</option>
-                    <option value="O Senhor dos Anéis">O Senhor dos Anéis</option>
-                    <option value="Harry Potter">Harry Potter</option>
-                    <option value="1984">1984</option>
                 </select>
             </div>
 
@@ -105,6 +106,10 @@
 
             <!-- espaco vazio onde o botao de alterar vai aparecer quando o usuario clicar em editar -->
             <div id="alterar" class="mb-2"></div>
+
+            <!-- botao para cancelar a edicao -->
+            <div id="cancelar" class="mb-2"></div>
+
 
             <!-- botao principal para enviar e salvar uma nova resenha -->
             <button id="btnEnviar" class="btn btn-primary w-100" onclick="salvarResenha()">Enviar</button>
