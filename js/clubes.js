@@ -38,8 +38,8 @@ function listar() {
             "<td>" + clube.nome_clube + "</td>" +
             // Célula com o tema do clube
             "<td>" + clube.tema + "</td>" +
-            // Célula com o status do clube
-            "<td>" + clube.status + "</td>" +
+            // Célula com o líder do clube
+            "<td>" + clube.lider + "</td>" +
             // Célula com os botões de ação
             "<td>" +
                 // Botão "Editar" que, ao ser clicado, chama a função editar() passando o id do clube
@@ -63,7 +63,7 @@ function salvar() {
     // Pega o valor do campo "tema" e remove espaços em branco no início/fim
     const tema = document.getElementById("tema").value.trim();
     // Pega o valor do campo "status"
-    const status = document.getElementById("status").value;
+    const status = document.getElementById("inputUsuario").value;
     // Verifica se o nome do clube ou o tema estão vazios
     if (nome_clube === "" || tema === "") {
         // Exibe um alerta pedindo para preencher todos os campos
@@ -83,8 +83,8 @@ function salvar() {
             nome_clube: nome_clube,
             // Define o tema do clube com o valor digitado
             tema: tema,
-            // Define o status do clube com o valor selecionado
-            status: status
+            // Define o líder do clube com o valor selecionado
+            lider: status
         });
     } else {
         // Caso contrário (id preenchido), significa que é uma edição de um clube existente
@@ -96,8 +96,8 @@ function salvar() {
                 clubes[i].nome_clube = nome_clube;
                 // Atualiza o tema do clube encontrado
                 clubes[i].tema = tema;
-                // Atualiza o status do clube encontrado
-                clubes[i].status = status;
+                // Atualiza o líder do clube encontrado
+                clubes[i].lider = status;
             }
         }
     }
@@ -124,7 +124,7 @@ function editar(id) {
             // Preenche o campo "tema" com o tema do clube encontrado
             document.getElementById("tema").value = clubes[i].tema;
             // Preenche o campo "status" com o status do clube encontrado
-            document.getElementById("status").value = clubes[i].status;
+            document.getElementById("inputUsuario").value = clubes[i].lider;
         }
     }
     // Rola a página até o topo (posição 0,0), facilitando a visualização do formulário
@@ -167,8 +167,26 @@ function limpar() {
     // Limpa o campo "tema"
     document.getElementById("tema").value = "";
     // Define o campo "status" de volta para o valor padrão "Ativo"
-    document.getElementById("status").value = "Ativo";
+    document.getElementById("inputUsuario").value = "Ativo";
+}
+
+function carregarUsuario() {
+    // busca a lista de usuarios salvos no localstorage; se nao tiver nenhum, cria uma lista vazia
+    let lista = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+    // monta o html das opcoes do select com os nomes dos usuarios
+    let options = "";
+
+    // passa de usuario em usuario montando a tag <option> para cada um
+    for (let usuario of lista) {
+        // monta a tag <option> com o nome do usuario como valor e texto
+        options += `<option value="${usuario.nome}">${usuario.nome}</option>`;
+    }
+
+    // adiciona as opcoes dentro do select na tela
+    document.getElementById("inputUsuario").innerHTML += options;
 }
 
 // Chama a função listar() assim que o script é carregado, para exibir os clubes já salvos ao abrir a página
 listar();
+carregarUsuario();
