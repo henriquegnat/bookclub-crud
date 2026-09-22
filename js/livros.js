@@ -24,7 +24,6 @@ function listar() {
                 <td>${livro.paginas}</td>
                 <td>${livro.ano}</td>
                 <td>
-                // botoes de editar e excluir, com o id do livro passado como parametro para as funcoes
                     <button class="btn btn-sm btn-warning me-1" onclick="editar(${livro.id})">Editar</button>
                     <button class="btn btn-sm btn-danger" onclick="excluir(${livro.id})">Excluir</button>
                 </td>
