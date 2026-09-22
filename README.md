@@ -36,7 +36,7 @@ O projeto conecta diretamente o modelo conceitual desenvolvido na disciplina de 
 | **1. Gêneros Literários** | `GENERO` | *Julia Moura Ruela* | CRUD e categorização de gêneros (Fantasia, Ficção, Romance, etc.). |
 | **2. Leitores (Usuários)** | `USUARIO` | *Yasmin Luz de Araújo* | CRUD de perfis de leitores, e-mails e metas anuais de leitura. |
 | **3. Catálogo de Livros** | `LIVRO` | *Leticia Hellen Prata de Souza* | CRUD de livros de acervo com título, autor, gênero, páginas e ano de publicação. |
-| **4. Clubes de Leitura** | `CLUBE` | *Sabrina Bernardi Ferreira* | CRUD de clubes de leitura com nome, tema e status de atividade. |
+| **4. Clubes de Leitura** | `CLUBE` | *Sabrina Bernardi Ferreira* | CRUD de clubes de leitura com nome, tema e líder responsável. |
 | **5. Avaliações & Resenhas**| `RESENHA` | *Henrique Gnatkovski de Almeida* | CRUD de resenhas críticas, com usuário, livro, nota e spoiler|
 
 ---
