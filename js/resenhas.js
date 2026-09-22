@@ -2,6 +2,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     listar();
     carregarUsuario();
+    carregarLivro();
 });
 
 // funcao chamada quando o usuario clica no botao "enviar"
@@ -105,6 +106,10 @@ function excluir(indice) {
 
     // mensagem de confirmacao para o usuario
     alert("Resenha excluída com sucesso!");
+
+    // habilita o botao de enviar para criar novas resenhas
+    document.getElementById("btnEnviar").disabled = false;
+
 }
 
 // funcao que carrega os dados da resenha de volta nos campos para o usuario poder editar
@@ -118,8 +123,13 @@ function carregar(indice) {
     document.getElementById("inputNota").value = lista[indice].nota;
     document.getElementById("inputSpoiler").checked = lista[indice].spoiler;
 
+    document.getElementById("btnEnviar").disabled = true; // desabilita o botao de enviar para nao criar uma nova resenha enquanto edita
+
     // cria dinamicamente o botao amarelo para confirmar a alteracao daquela posicao
     document.getElementById("alterar").innerHTML = `<button class="btn btn-warning w-100 mb-2" onclick="alterar(${indice})">Salvar Alteração</button>`;
+
+    // cria dinamicamente o botao para cancelar a edicao
+    document.getElementById("cancelar").innerHTML = `<button class="btn btn-secondary w-100 mb-2" onclick="cancelar()">Cancelar</button>`;
 }
 
 // funcao chamada quando o usuario clica em "salvar alteracao"
@@ -139,6 +149,19 @@ function alterar(indice) {
     // limpa o botao de alterar da tela ja que a edicao foi concluida
     document.getElementById("alterar").innerHTML = "";
 
+    //limoa o botao de cancelar da tela ja que a edicao foi concluida
+    document.getElementById("cancelar").innerHTML = "";
+
+    // limpa os campos do formulario para ficarem prontos para uma nova resenha
+    document.getElementById("inputUsuario").value = "";
+    document.getElementById("inputLivro").value = "";
+    document.getElementById("inputResenha").value = "";
+    document.getElementById("inputNota").value = "";
+    document.getElementById("inputSpoiler").checked = false;
+    
+    // habilita o botao de enviar para criar novas resenhas
+    document.getElementById("btnEnviar").disabled = false;
+    
     // recarrega a lista para mostrar a resenha ja atualizada
     listar();
 }
@@ -159,4 +182,37 @@ function carregarUsuario() {
 
     // adiciona as opcoes dentro do select na tela
     document.getElementById("inputUsuario").innerHTML += options;
+}
+
+function carregarLivro() {
+    // busca a lista de livros salvos no localstorage; se nao tiver nenhum, cria uma lista vazia
+    let lista = JSON.parse(localStorage.getItem("livros")) || [];
+    
+    // monta o html das opcoes do select com os titulos dos livros
+    let options = "";
+
+    for (let livro of lista) {
+        options += `<option value="${livro.titulo}">${livro.titulo}</option>`;
+    }
+
+    document.getElementById("inputLivro").innerHTML += options;
+}
+
+function cancelar() {
+    // limpa os campos do formulario
+    document.getElementById("inputUsuario").value = "";
+    document.getElementById("inputLivro").value = "";
+    document.getElementById("inputResenha").value = "";
+    document.getElementById("inputNota").value = "";
+    document.getElementById("inputSpoiler").checked = false;
+
+    // limpa os botoes de alterar e cancelar da tela
+    document.getElementById("alterar").innerHTML = "";
+    document.getElementById("cancelar").innerHTML = "";
+
+    // habilita novamente o botao de enviar para criar novas resenhas
+    document.getElementById("btnEnviar").disabled = false; 
+
+    // recarrega a lista de resenhas para mostrar a tela original
+    listar();
 }
