@@ -9,7 +9,6 @@ function salvarGenero() {
     // .value serve para ler o conteúdo de inputs e textareas
     let nome = document.getElementById("inputGenero").value;
     let descricao = document.getElementById("inputDescricao").value;
-
     // busca os generos salvos no navegador; se nao tiver nenhum ainda, cria uma lista vazia []
     // o localStorage só guarda TEXTO, então usamos JSON.parse para
     // transformar esse texto de volta em uma lista (array) de verdade.
@@ -22,7 +21,7 @@ function salvarGenero() {
     }
 
     // adiciona o novo genero no final da lista
-    lista.push({ nome, descricao });
+    lista.push({ nome, descricao});
 
     // salva a lista atualizada de volta na memoria do localStorage do navegador
     // como o localStorage só aceita texto, usamos JSON.stringify
@@ -35,6 +34,7 @@ function salvarGenero() {
     // limpa os campos do formulario
     document.getElementById("inputGenero").value = "";
     document.getElementById("inputDescricao").value = "";
+
 }
 
 // funcao que le o localstorage e monta os cards na tela
@@ -93,7 +93,6 @@ function listar() {
         // textContent, apareceria exatamente "<b>Romance</b>"
         // escrito na tela, sem risco
         document.getElementById(`titulo-${indice}`).textContent = genero.nome;
-        
         // faz o mesmo para a descricao do genero
         document.getElementById(`descricao-${indice}`).textContent = genero.descricao;
         indice++;
@@ -138,7 +137,6 @@ function alterar(indice) {
     // substitui os dados antigos daquela posicao pelos novos valores dos campos
     lista[indice].nome = document.getElementById("inputGenero").value;
     lista[indice].descricao = document.getElementById("inputDescricao").value;
-
     localStorage.setItem("generos", JSON.stringify(lista));
 
     // limpa o botao de alterar e os campos, ja que a edicao foi concluida
