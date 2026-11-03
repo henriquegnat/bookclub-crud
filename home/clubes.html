@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="PT-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookClub - Clubes</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+
+<!--MENU-->
+     <!-- menu de navegacao superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <div class="container">
+            <!-- link para voltar ao inicio -->
+            <a class="navbar-brand fw-bold" href="../index.html">BookClub</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="../index.html">Início</a>
+                <a class="nav-link" href="usuarios.html">Usuários</a>
+                <a class="nav-link" href="livros.html">Livros</a>
+                <a class="nav-link" href="generos.html">Gêneros</a>
+                <!-- esse fica marcado como ativo porque estamos nele -->
+                <a class="nav-link active" href="clubes.html">Clubes</a>
+                <a class="nav-link" href="resenhas.html">Resenhas</a>
+            </div>
+        </div>
+    </nav>
+
+<div class="container py-4">
+    <h2 class="mb-4">Clubes de Leitura</h2>
+
+    <!-- formulario (usado para cadastrar e editar) -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <!-- guarda o id do clube que esta sendo editado (vazio = clube novo) -->
+            <input type="hidden" id="id">
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nome do clube</label>
+                    <input type="text" class="form-control" id="nome_clube" placeholder="Ex: Clube dos Clássicos">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tema</label>
+                    <input type="text" class="form-control" id="tema" placeholder="Ex: Ficção Científica">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Usuário</label>
+                    <select class="form-select" id="inputUsuario">
+                        <option value="Ativo" disabled selected >Fundador</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-primary mt-3" onclick="salvar()">Salvar</button>
+            <button type="button" class="btn btn-secondary mt-3" onclick="limpar()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- tabela -->
+    <table class="table table-striped bg-white align-middle">
+        <thead>
+            <tr>
+                <th>Nome do clube</th>
+                <th>Tema</th>
+                <th>Fundador</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela"></tbody>
+    </table>
+</div>
+
+<script src="../js/clubes.js"></script>
+</body>
+</html>
