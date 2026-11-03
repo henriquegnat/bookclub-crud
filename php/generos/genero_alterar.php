@@ -13,7 +13,7 @@ $id   = (int) $_GET["id"]; // id vem pela URL: genero_alterar.php?id=3
 $stmt = $conexao->prepare("
     UPDATE genero SET
     nome = ?
-    WHERE id = ?");
+    WHERE id_genero = ?");
 $stmt->bind_param("si", $nome, $id);
 $stmt->execute();
 
