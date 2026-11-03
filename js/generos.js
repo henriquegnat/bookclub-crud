@@ -18,11 +18,11 @@ function salvarGenero() {
     if (!nome || !descricao) {
         alert("Por favor, preencha todos os campos");
         return;
+
     }
 
     // adiciona o novo genero no final da lista
     lista.push({ nome, descricao});
-
     // salva a lista atualizada de volta na memoria do localStorage do navegador
     // como o localStorage só aceita texto, usamos JSON.stringify
     // para transformar a lista (array) em texto antes de guardar
@@ -34,6 +34,8 @@ function salvarGenero() {
     // limpa os campos do formulario
     document.getElementById("inputGenero").value = "";
     document.getElementById("inputDescricao").value = "";
+
+    
 
 }
 
