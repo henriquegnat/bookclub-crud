@@ -9,7 +9,7 @@ $retorno = [
 // trazendo as infos do front end
 $id = (int) $_GET["id"]; // convertendo para inteiro: genero_excluir.php?id=3
 
-$stmt = $conexao->prepare("DELETE FROM genero WHERE id = ?");
+$stmt = $conexao->prepare("DELETE FROM genero WHERE id_genero = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 
