@@ -8,13 +8,15 @@ $retorno = [
 
 // trazendo as infos do front end
 $nome = $_POST["nome"];
+$descricao = $_POST["descricao"] ?? "";
 $id   = (int) $_GET["id"]; // id vem pela URL: genero_alterar.php?id=3
 
 $stmt = $conexao->prepare("
     UPDATE genero SET
-    nome = ?
+    nome = ?,
+    descricao = ?
     WHERE id_genero = ?");
-$stmt->bind_param("si", $nome, $id);
+$stmt->bind_param("ssi", $nome, $descricao, $id);
 $stmt->execute();
 
 if ($stmt->affected_rows > 0) {

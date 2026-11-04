@@ -1,150 +1,196 @@
+// caminho ate os arquivos php, a partir da pagina home/generos.html
+const API = "../php/generos";
+
+// guarda os generos que vieram do banco para usar ao clicar em editar
+let generos = [];
+
 // espera a pagina carregar todo o html antes de rodar a funcao listar
 document.addEventListener("DOMContentLoaded", function () {
     listar();
 });
 
 // funcao chamada quando o usuario clica no botao cadastrar
-function salvarGenero() {
+async function salvarGenero() {
     // pega os valores digitados nos campos da tela
-    // .value serve para ler o conteúdo de inputs e textareas
-    let nome = document.getElementById("inputGenero").value;
-    let descricao = document.getElementById("inputDescricao").value;
-    // busca os generos salvos no navegador; se nao tiver nenhum ainda, cria uma lista vazia []
-    // o localStorage só guarda TEXTO, então usamos JSON.parse para
-    // transformar esse texto de volta em uma lista (array) de verdade.
-    let lista = JSON.parse(localStorage.getItem("generos")) || [];
+    // .value serve para ler o conteudo de inputs e textareas
+    let nome = document.getElementById("inputGenero").value.trim();
+    let descricao = document.getElementById("inputDescricao").value.trim();
 
     // validacao simples: se nome ou descricao estiverem vazios, avisa e para a funcao
     if (!nome || !descricao) {
         alert("Por favor, preencha todos os campos");
         return;
-
     }
 
-    // adiciona o novo genero no final da lista
-    lista.push({ nome, descricao});
-    // salva a lista atualizada de volta na memoria do localStorage do navegador
-    // como o localStorage só aceita texto, usamos JSON.stringify
-    // para transformar a lista (array) em texto antes de guardar
-    localStorage.setItem("generos", JSON.stringify(lista));
+    // FormData monta os dados que o php le com $_POST
+    let dados = new FormData();
+    dados.append("nome", nome);
+    dados.append("descricao", descricao);
 
-    // atualiza os cards na tela para o novo genero ja aparecer
-    listar();
+    try {
+        // fetch envia os dados para o php, que grava no banco
+        // await espera a resposta antes de continuar
+        let resposta = await fetch(`${API}/genero_novo.php`, {
+            method: "POST",
+            body: dados
+        });
 
-    // limpa os campos do formulario
-    document.getElementById("inputGenero").value = "";
-    document.getElementById("inputDescricao").value = "";
+        // transforma o json devolvido pelo php em um objeto do javascript
+        let retorno = await resposta.json();
 
-    
+        // se o php respondeu que nao deu certo, mostra a mensagem e para a funcao
+        if (retorno.status !== "ok") {
+            alert(retorno.mensagem);
+            return;
+        }
 
+        // limpa os campos do formulario
+        limparFormulario();
+
+        // busca os dados de novo para o novo genero ja aparecer
+        await listar();
+    } catch (erro) {
+        console.error(erro);
+        alert("Não foi possível cadastrar o gênero. Verifique se ele já existe.");
+    }
 }
 
-// funcao que le o localstorage e monta os cards na tela
-function listar() {
+// funcao que busca os generos no banco e monta os cards na tela
+async function listar() {
+    let cards = document.getElementById("card-genero");
 
-    //busca a lista de generos salva
-    let lista = JSON.parse(localStorage.getItem("generos")) || [];
+    try {
+        // sem method, o fetch faz um GET, usado para buscar dados
+        let resposta = await fetch(`${API}/genero_get.php`);
+        let retorno = await resposta.json();
 
-    // limpa a div onde ficam os cards para nao duplicar o conteudo anterior
-    document.getElementById("card-genero").innerHTML = "";
+        if (retorno.status !== "ok") {
+            alert(retorno.mensagem);
+            return;
+        }
 
-    // guarda a posiçao de cada genero na lista para poder editar ou excluir depois   
-    let indice = 0;
+        // retorno.data e a lista de generos enviada pelo php
+        generos = retorno.data;
 
-    // for...of repete o bloco de código uma vez para cada item
-    // da lista. a cada volta, "genero" representa o item atual
-    for (let genero of lista) {
-        //inner HTML serve para colocar o conteudo dentro de uma div que pode ser modificada
-        document.getElementById("card-genero").innerHTML += `
-        <div class="col-12 col-sm-6 col-md-4">
-            <div id="genero-${indice}" class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title" id="titulo-${indice}"></h5>
-                    <p class="card-text text-muted" id="descricao-${indice}"></p>
-                </div>
+        // limpa a div onde ficam os cards para nao duplicar o conteudo anterior
+        cards.innerHTML = "";
 
-                <!-- rodape com os botoes de acao (editar e excluir) passando o indice -->
-                <div class="card-footer bg-white d-flex justify-content-end gap-2">
-                    <button class="btn btn-sm btn-outline-warning" onclick="carregar(${indice})">Editar</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="excluir(${indice})">Excluir</button>
+        // for...of repete o bloco de codigo uma vez para cada item
+        // da lista. a cada volta, "genero" representa o item atual
+        for (let genero of generos) {
+            // agora cada card usa o id_genero do banco, em vez da posicao na lista
+            cards.innerHTML += `
+            <div class="col-12 col-sm-6 col-md-4">
+                <div id="genero-${genero.id_genero}" class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title" id="titulo-${genero.id_genero}"></h5>
+                        <p class="card-text text-muted" id="descricao-${genero.id_genero}"></p>
+                    </div>
+
+                    <!-- rodape com os botoes de acao (editar e excluir) passando o id -->
+                    <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                        <button class="btn btn-sm btn-outline-warning" onclick="carregar(${genero.id_genero})">Editar</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="excluir(${genero.id_genero})">Excluir</button>
+                    </div>
                 </div>
             </div>
-        </div>
-        `;
+            `;
+        }
 
-        // soma 1 ao índice, para o próximo card da lista receber
-        // um id diferente (genero-0, genero-1, genero-2...)
-        indice++;
-    }
-
-    // preenche os textos depois com textContent, assim o que o usuario digitou
-    // nunca e interpretado como html (evita injetar codigo pela caixinha)
-    indice = 0;
-    for (let genero of lista) {
-
-        // encontra o título vazio criado no loop anterior (pelo id)
-        // e coloca o texto do nome do gênero usando textContent.
-        //
-        // a diferença entre textContent e innerHTML:
-        // - innerHTML interpreta o texto como código HTML
-        // - textContent trata tudo como texto puro
-        //
-        // se o usuário digitasse algo como "<b>Romance</b>" no
-        // campo, com innerHTML o navegador deixaria "Romance" em
-        // negrito (ou até executaria um script malicioso). com
-        // textContent, apareceria exatamente "<b>Romance</b>"
-        // escrito na tela, sem risco
-        document.getElementById(`titulo-${indice}`).textContent = genero.nome;
-        // faz o mesmo para a descricao do genero
-        document.getElementById(`descricao-${indice}`).textContent = genero.descricao;
-        indice++;
+        // preenche os textos depois com textContent, assim o que o usuario digitou
+        // nunca e interpretado como html (evita injetar codigo pela caixinha)
+        for (let genero of generos) {
+            document.getElementById(`titulo-${genero.id_genero}`).textContent = genero.nome;
+            document.getElementById(`descricao-${genero.id_genero}`).textContent = genero.descricao;
+        }
+    } catch (erro) {
+        console.error(erro);
+        alert("Não foi possível carregar os gêneros.");
     }
 }
 
-// funcao para apagar um genero pelo indice dele
-function excluir(indice) {
-    let lista = JSON.parse(localStorage.getItem("generos")) || [];
+// funcao para apagar um genero pelo id dele
+async function excluir(id) {
+    try {
+        // o id vai pela url, assim como no genero_alterar.php
+        let resposta = await fetch(`${API}/genero_excluir.php?id=${id}`);
+        let retorno = await resposta.json();
 
-    // o splice remove 1 item exatamente na posicao do indice clicado
-    lista.splice(indice, 1);
+        if (retorno.status !== "ok") {
+            alert(retorno.mensagem);
+            return;
+        }
 
-    localStorage.setItem("generos", JSON.stringify(lista));
+        // redesenha os cards na tela
+        await listar();
 
-    // redesenha os cards na tela
-    listar();
-
-    alert("Gênero excluído com sucesso!");
+        alert("Gênero excluído com sucesso!");
+    } catch (erro) {
+        console.error(erro);
+        alert("Não foi possível excluir o gênero.");
+    }
 }
 
 // funcao que carrega os dados do genero de volta nos campos para o usuario poder editar
-function carregar(indice) {
-    // busca a lista atual salva no localStorage
-    let lista = JSON.parse(localStorage.getItem("generos")) || [];
+function carregar(id) {
+    // procura na lista o genero que tem o id clicado
+    let genero = generos.find(function (item) {
+        return Number(item.id_genero) === id;
+    });
 
-    // lista[indice] acessa o gênero que está naquela posição da lista.
-    // .nome e .descricao pegam as informações guardadas nele.
-    // atribuir esses valores a ".value" preenche visualmente os
-    // campos de input/textarea com os dados atuais do gênero
-    document.getElementById("inputGenero").value = lista[indice].nome;
-    document.getElementById("inputDescricao").value = lista[indice].descricao;
+    // se nao encontrou o genero, para a funcao
+    if (!genero) {
+        return;
+    }
 
-    // cria dinamicamente o botao amarelo para confirmar a alteracao daquela posicao
-    document.getElementById("alterar").innerHTML = `<button class="btn btn-warning w-100 mb-2" onclick="alterar(${indice})">Salvar Alteração</button>`;
+    // preenche os campos com os dados atuais do genero
+    document.getElementById("inputGenero").value = genero.nome;
+    document.getElementById("inputDescricao").value = genero.descricao ?? "";
+
+    // cria dinamicamente o botao amarelo para confirmar a alteracao daquele genero
+    document.getElementById("alterar").innerHTML = `<button class="btn btn-warning w-100 mb-2" onclick="alterar(${id})">Salvar Alteração</button>`;
 }
 
 // funcao chamada quando o usuario clica em "salvar alteracao"
-function alterar(indice) {
-    let lista = JSON.parse(localStorage.getItem("generos")) || [];
+async function alterar(id) {
+    let nome = document.getElementById("inputGenero").value.trim();
+    let descricao = document.getElementById("inputDescricao").value.trim();
 
-    // substitui os dados antigos daquela posicao pelos novos valores dos campos
-    lista[indice].nome = document.getElementById("inputGenero").value;
-    lista[indice].descricao = document.getElementById("inputDescricao").value;
-    localStorage.setItem("generos", JSON.stringify(lista));
+    if (!nome || !descricao) {
+        alert("Por favor, preencha todos os campos");
+        return;
+    }
 
-    // limpa o botao de alterar e os campos, ja que a edicao foi concluida
-    document.getElementById("alterar").innerHTML = "";
+    let dados = new FormData();
+    dados.append("nome", nome);
+    dados.append("descricao", descricao);
+
+    try {
+        // o id vai pela url e os novos dados vao pelo POST
+        let resposta = await fetch(`${API}/genero_alterar.php?id=${id}`, {
+            method: "POST",
+            body: dados
+        });
+        let retorno = await resposta.json();
+
+        if (retorno.status !== "ok") {
+            alert(retorno.mensagem);
+            return;
+        }
+
+        // limpa o botao de alterar e os campos, ja que a edicao foi concluida
+        document.getElementById("alterar").innerHTML = "";
+        limparFormulario();
+
+        await listar();
+    } catch (erro) {
+        console.error(erro);
+        alert("Não foi possível alterar o gênero.");
+    }
+}
+
+// funcao que limpa os campos do formulario
+function limparFormulario() {
     document.getElementById("inputGenero").value = "";
     document.getElementById("inputDescricao").value = "";
-
-    listar();
 }
