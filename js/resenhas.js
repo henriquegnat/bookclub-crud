@@ -1,218 +1,271 @@
-// espera a pagina carregar todo o html antes de rodar a funcao listar
+// ============================================================================
+// ARQUIVO: js/resenhas.js (Baseado na Aula 9 da Apostila - Fetch + FormData)
+// ============================================================================
+
+// Espera a página carregar todo o HTML antes de buscar os dados no PHP
 document.addEventListener("DOMContentLoaded", function () {
-    listar();
-    carregarUsuario();
-    carregarLivro();
+    listar();          // Busca e exibe todas as resenhas (resenha_get.php)
+    carregarUsuario(); // Busca os usuários para preencher o <select> (usuario_get.php)
+    carregarLivro();   // Busca os livros para preencher o <select> (livro_get.php)
 });
 
-// funcao chamada quando o usuario clica no botao "enviar"
-function salvarResenha() {
-    // pega os valores digitados ou selecionados nos campos da tela
+// ============================================================================
+// 1. INSERIR (CREATE) — Baseado na Seção 9.5 da Apostila (Página 18)
+// Monta um FormData com todos os campos e envia via POST para resenha_novo.php
+// ============================================================================
+async function salvarResenha() {
+    // Pega os valores digitados ou selecionados nos campos da tela
     let usuario = document.getElementById("inputUsuario").value;
-    let livro = document.getElementById("inputLivro").value;
+    let livro   = document.getElementById("inputLivro").value;
     let resenha = document.getElementById("inputResenha").value;
-    let nota = document.getElementById("inputNota").value;
-    // no checkbox usamos .checked para saber se esta marcado (true) ou nao (false)
-    let spoiler = document.getElementById("inputSpoiler").checked;
+    let nota    = document.getElementById("inputNota").value;
+    // No checkbox usamos .checked: convertemos para 1 (marcado) ou 0 (desmarcado)
+    let spoiler = document.getElementById("inputSpoiler").checked ? 1 : 0;
 
-    // busca as resenhas salvas no navegador; se nao tiver nenhuma ainda, cria uma lista vazia []
-    let lista = JSON.parse(localStorage.getItem("resenhas")) || [];
-
-    // validacao simples: se usuario, livro ou resenha estiverem vazios, avisa e para a funcao
-    if (!usuario || !livro || !resenha) {
+    // Validação simples no front-end
+    if (!usuario || !livro || !resenha || !nota) {
         alert("Por favor, preencha todos os campos");
-        return; // o return interrompe a funcao aqui para nao salvar nada incompleto
+        return;
     }
 
-    // adiciona a nova resenha no final da lista
-    lista.push({ usuario, livro, resenha, nota, spoiler });
+    // Monta o FormData com os campos que o PHP vai ler em $_POST['...']
+    const fd = new FormData();
+    fd.append("id_usuario",     usuario);
+    fd.append("id_livro",       livro);
+    fd.append("nota",           nota);
+    fd.append("texto_resenha",  resenha);
+    fd.append("contem_spoiler", spoiler);
 
-    // salva a lista atualizada de volta na memoria do navegador (convertida para texto com json)
-    localStorage.setItem("resenhas", JSON.stringify(lista));
+    // Envia a requisição POST com fetch() para o PHP
+    const retorno = await fetch("../php/resenha_novo.php", {
+        method: "POST",
+        body: fd
+    });
+    const resposta = await retorno.json();
 
-    // atualiza os cards na tela para a nova resenha ja aparecer
-    listar();
+    // Verifica o status retornado pelo PHP ('ok' ou 'nok')
+    if (resposta.status == "ok") {
+        alert("SUCESSO: " + resposta.mensagem + " (Tamanho: " + resenha.length + " caracteres)");
 
-    // limpa todos os campos do formulario para ficarem prontos para uma nova resenha
-    document.getElementById("inputUsuario").value = "";
-    document.getElementById("inputLivro").value = "";
-    document.getElementById("inputResenha").value = "";
-    document.getElementById("inputNota").value = "";
-    document.getElementById("inputSpoiler").checked = false;
+        // Atualiza a lista de cards na tela
+        listar();
+
+        // Limpa os campos do formulário
+        document.getElementById("inputUsuario").value = "";
+        document.getElementById("inputLivro").value = "";
+        document.getElementById("inputResenha").value = "";
+        document.getElementById("inputNota").value = "";
+        document.getElementById("inputSpoiler").checked = false;
+    } else {
+        alert("ERRO: " + resposta.mensagem);
+    }
 }
 
-// funcao que le o localstorage e monta os cards na tela
-function listar() {
-    // busca a lista de resenhas salvas
-    let lista = JSON.parse(localStorage.getItem("resenhas")) || [];
+// ============================================================================
+// 2. LISTAR (READ) — Baseado na Seção 9.4 da Apostila (Página 17)
+// Faz um fetch GET simples para resenha_get.php e monta os cards na tela
+// ============================================================================
+async function listar() {
+    const retorno = await fetch("../php/resenha_get.php");
+    const resposta = await retorno.json();
 
-    // limpa a div onde ficam os cards para nao duplicar o conteudo anterior
-    document.getElementById("card-resenha").innerHTML = "";
+    const containerCards = document.getElementById("card-resenha");
+    containerCards.innerHTML = "";
 
-    // variavel para controlar a posicao (indice) de cada resenha na lista (0, 1, 2...)
-    let indice = 0;
+    if (resposta.status == "ok") {
+        for (let resenha of resposta.data) {
+            // Converte o campo contem_spoiler (que vem 0 ou 1 do MySQL) para booleano
+            let temSpoiler = Number(resenha.contem_spoiler) === 1;
 
-    // passa de resenha em resenha montando o html de cada card
-    for (let resenha of lista) {
-        document.getElementById("card-resenha").innerHTML += `
-        <div id="resenha-${indice}" class="card shadow-sm">
-            <!-- cabecalho do card com o nome do livro e a nota -->
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <strong class="fs-5">${resenha.livro}</strong>
-                <span class="badge bg-primary">Nota: ${resenha.nota}</span>
+            // Formata a data do padrão do banco (AAAA-MM-DD) para o padrão brasileiro (DD/MM/AAAA)
+            let dataFormatada = resenha.data_publicacao
+                ? resenha.data_publicacao.split("-").reverse().join("/")
+                : "";
+
+            // Adiciona o card da resenha usando o id_resenha real do banco de dados
+            containerCards.innerHTML += `
+            <div id="resenha-${resenha.id_resenha}" class="card shadow-sm">
+                <!-- Cabeçalho do card com o título do livro e a nota -->
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <strong class="fs-5">${resenha.titulo_livro}</strong>
+                    <span class="badge bg-primary">Nota: ${resenha.nota}</span>
+                </div>
+
+                <!-- Corpo do card com o autor, data de publicação, aviso de spoiler e o texto -->
+                <div class="card-body"> 
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <p class="card-subtitle text-muted small mb-0">
+                            Feito por: <strong>${resenha.nome_usuario}</strong>
+                        </p>
+                        <span class="text-muted small">${dataFormatada} | #${resenha.id_resenha}</span>
+                    </div>
+
+                    <!-- Se tiver spoiler fica vermelho, se não fica cinza -->
+                    <span class="badge ${temSpoiler ? 'bg-danger' : 'bg-secondary'} mb-2">
+                        ${temSpoiler ? "ALERTA DE SPOILER!" : "Sem spoiler"}
+                    </span>
+
+                    <!-- Se tiver spoiler, já adiciona a classe CSS 'spoiler' que borra o texto -->
+                    <p id="spoiler-${resenha.id_resenha}" class="card-text mt-2 ${temSpoiler ? 'spoiler' : ''}">${resenha.texto_resenha}</p>
+                </div>
+
+                <!-- Rodapé com os botões de ação (Editar e Excluir) passando o id_resenha do MySQL -->
+                <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                    <button class="btn btn-sm btn-outline-warning" onclick="carregar(${resenha.id_resenha})">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="excluir(${resenha.id_resenha})">Excluir</button>
+                </div>
             </div>
-
-            <!-- corpo do card com o autor, aviso de spoiler e o texto da resenha -->
-            <div class="card-body"> 
-                <p class="card-subtitle mb-2 text-muted small">Feito por: <strong>${resenha.usuario}</strong></p>
-                <!-- se tiver spoiler fica vermelho, se nao fica cinza -->
-                <span class="badge ${resenha.spoiler ? 'bg-danger' : 'bg-secondary'} mb-2">
-                    ${resenha.spoiler ? "⚠️ ALERTA DE SPOILER!" : "Sem spoiler"}
-                </span>
-                <p id="spoiler-${indice}" class="card-text mt-2">${resenha.resenha}</p>
-            </div>
-
-            <!-- rodape com os botoes de acao (editar e excluir) passando o numero do indice -->
-            <div class="card-footer bg-white d-flex justify-content-end gap-2">
-                <button class="btn btn-sm btn-outline-warning" onclick="carregar(${indice})">Editar</button>
-                <button class="btn btn-sm btn-outline-danger" onclick="excluir(${indice})">Excluir</button>
-            </div>
-        </div>
-        `;
-
-        // se essa resenha tiver spoiler marcado, adiciona a classe css que borra o texto
-        if (resenha.spoiler) {
-            document.getElementById(`spoiler-${indice}`).classList.add("spoiler");
+            `;
         }
-
-        // passa para o proximo indice
-        indice++;
+    } else {
+        // Caso não haja nenhuma resenha cadastrada no banco
+        containerCards.innerHTML = `<p class="text-muted text-center">Nenhuma resenha cadastrada no banco de dados.</p>`;
     }
 }
 
-// funcao para apagar uma resenha pelo indice dela
-function excluir(indice) {
-    // pega a lista atual do localstorage
-    let lista = JSON.parse(localStorage.getItem("resenhas")) || [];
+// ============================================================================
+// 3. EXCLUIR (DELETE) — Baseado na Seção 9.7 da Apostila (Página 19)
+// Chama resenha_excluir.php passando o ID na URL (?id=X)
+// ============================================================================
+async function excluir(id) {
+    const retorno = await fetch("../php/resenha_excluir.php?id=" + id);
+    const resposta = await retorno.json();
 
-    // o splice remove 1 item exatamente na posicao do indice clicado
-    lista.splice(indice, 1);
+    alert(resposta.mensagem);
 
-    // salva a lista sem o item de volta no localstorage
-    localStorage.setItem("resenhas", JSON.stringify(lista));
-
-    // redesenha os cards na tela para sumir com o que foi excluido
-    listar();
-
-    // mensagem de confirmacao para o usuario
-    alert("Resenha excluída com sucesso!");
-
-    // habilita o botao de enviar para criar novas resenhas
-    document.getElementById("btnEnviar").disabled = false;
-
+    if (resposta.status == "ok") {
+        // Redesenha os cards na tela para sumir com o registro excluído
+        listar();
+        document.getElementById("btnEnviar").disabled = false;
+    }
 }
 
-// funcao que carrega os dados da resenha de volta nos campos para o usuario poder editar
-function carregar(indice) {
-    let lista = JSON.parse(localStorage.getItem("resenhas")) || [];
+// ============================================================================
+// 4. ALTERAR - FASE 1 (Buscar por ID) — Baseado na Seção 9.6 da Apostila (Pág. 18/19)
+// Busca o registro pelo ID na URL (resenha_get.php?id=X) e preenche o formulário
+// ============================================================================
+async function carregar(id) {
+    const retorno = await fetch("../php/resenha_get.php?id=" + id);
+    const resposta = await retorno.json();
 
-    // joga as informacoes guardadas daquela resenha para dentro dos campos de texto
-    document.getElementById("inputUsuario").value = lista[indice].usuario;
-    document.getElementById("inputLivro").value = lista[indice].livro;
-    document.getElementById("inputResenha").value = lista[indice].resenha;
-    document.getElementById("inputNota").value = lista[indice].nota;
-    document.getElementById("inputSpoiler").checked = lista[indice].spoiler;
+    if (resposta.status == "ok") {
+        const reg = resposta.data[0];
 
-    document.getElementById("btnEnviar").disabled = true; // desabilita o botao de enviar para nao criar uma nova resenha enquanto edita
+        // Preenche os campos do formulário com os dados vindos do banco
+        document.getElementById("inputUsuario").value   = reg.id_usuario;
+        document.getElementById("inputLivro").value     = reg.id_livro;
+        document.getElementById("inputResenha").value   = reg.texto_resenha;
+        document.getElementById("inputNota").value      = reg.nota;
+        document.getElementById("inputSpoiler").checked = (reg.contem_spoiler == 1);
 
-    // cria dinamicamente o botao amarelo para confirmar a alteracao daquela posicao
-    document.getElementById("alterar").innerHTML = `<button class="btn btn-warning w-100 mb-2" onclick="alterar(${indice})">Salvar Alteração</button>`;
+        // Desabilita o botão de enviar para não criar uma nova resenha enquanto edita
+        document.getElementById("btnEnviar").disabled = true;
 
-    // cria dinamicamente o botao para cancelar a edicao
-    document.getElementById("cancelar").innerHTML = `<button class="btn btn-secondary w-100 mb-2" onclick="cancelar()">Cancelar</button>`;
+        // Cria dinamicamente o botão amarelo para confirmar a alteração passando o ID
+        document.getElementById("alterar").innerHTML = `<button class="btn btn-warning w-100 mb-2" onclick="alterar(${id})">Salvar Alteração</button>`;
+
+        // Cria dinamicamente o botão para cancelar a edição
+        document.getElementById("cancelar").innerHTML = `<button class="btn btn-secondary w-100 mb-2" onclick="cancelar()">Cancelar</button>`;
+    } else {
+        alert("ERRO: " + resposta.mensagem);
+    }
 }
 
-// funcao chamada quando o usuario clica em "salvar alteracao"
-function alterar(indice) {
-    let lista = JSON.parse(localStorage.getItem("resenhas")) || [];
+// ============================================================================
+// 5. ALTERAR - FASE 2 (Enviar UPDATE) — Baseado na Seção 9.6 da Apostila (Pág. 19)
+// O ID vai na URL (?id=X, lido via $_GET) e os dados vão no body (FormData, lidos via $_POST)
+// ============================================================================
+async function alterar(id) {
+    const fd = new FormData();
+    fd.append("id_usuario",     document.getElementById("inputUsuario").value);
+    fd.append("id_livro",       document.getElementById("inputLivro").value);
+    fd.append("texto_resenha",  document.getElementById("inputResenha").value);
+    fd.append("nota",           document.getElementById("inputNota").value);
+    fd.append("contem_spoiler", document.getElementById("inputSpoiler").checked ? 1 : 0);
 
-    // substitui os dados antigos daquela posicao pelos novos valores que estao nos campos
-    lista[indice].usuario = document.getElementById("inputUsuario").value;
-    lista[indice].livro = document.getElementById("inputLivro").value;
-    lista[indice].resenha = document.getElementById("inputResenha").value;
-    lista[indice].nota = document.getElementById("inputNota").value;
-    lista[indice].spoiler = document.getElementById("inputSpoiler").checked;
+    // ID na URL + dados no body (exatamente como na página 19 da apostila)
+    const retorno = await fetch("../php/resenha_alterar.php?id=" + id, {
+        method: "POST",
+        body: fd
+    });
+    const resposta = await retorno.json();
 
-    // salva a lista modificada no localstorage
-    localStorage.setItem("resenhas", JSON.stringify(lista));
+    if (resposta.status == "ok") {
+        alert("SUCESSO: " + resposta.mensagem);
 
-    // limpa o botao de alterar da tela ja que a edicao foi concluida
-    document.getElementById("alterar").innerHTML = "";
+        // Limpa os botões de alterar e cancelar da tela
+        document.getElementById("alterar").innerHTML = "";
+        document.getElementById("cancelar").innerHTML = "";
 
-    //limoa o botao de cancelar da tela ja que a edicao foi concluida
-    document.getElementById("cancelar").innerHTML = "";
+        // Limpa os campos do formulário
+        document.getElementById("inputUsuario").value = "";
+        document.getElementById("inputLivro").value = "";
+        document.getElementById("inputResenha").value = "";
+        document.getElementById("inputNota").value = "";
+        document.getElementById("inputSpoiler").checked = false;
 
-    // limpa os campos do formulario para ficarem prontos para uma nova resenha
-    document.getElementById("inputUsuario").value = "";
-    document.getElementById("inputLivro").value = "";
-    document.getElementById("inputResenha").value = "";
-    document.getElementById("inputNota").value = "";
-    document.getElementById("inputSpoiler").checked = false;
-    
-    // habilita o botao de enviar para criar novas resenhas
-    document.getElementById("btnEnviar").disabled = false;
-    
-    // recarrega a lista para mostrar a resenha ja atualizada
-    listar();
+        // Habilita novamente o botão de enviar
+        document.getElementById("btnEnviar").disabled = false;
+
+        // Recarrega a lista para mostrar a resenha atualizada
+        listar();
+    } else {
+        alert("ERRO: " + resposta.mensagem);
+    }
 }
 
-// funcao que carrega os usuarios do localstorage e monta o select na tela
-function carregarUsuario() {
-    // busca a lista de usuarios salvos no localstorage; se nao tiver nenhum, cria uma lista vazia
-    let lista = JSON.parse(localStorage.getItem("usuarios")) || [];
+// ============================================================================
+// FUNÇÕES AUXILIARES — Carregar Usuários e Livros nos <select>
+// ============================================================================
+async function carregarUsuario() {
+    const retorno = await fetch("../php/usuario_get.php");
+    const resposta = await retorno.json();
+    if (resposta.status == "ok") {
+        listarUsuario(resposta.data);
+    }
+}
 
-    // monta o html das opcoes do select com os nomes dos usuarios
-    let options = "";
-
-    // passa de usuario em usuario montando a tag <option> para cada um
+function listarUsuario(lista) {
+    // Monta o HTML das opções do select com o id_usuario no value e o nome visível
+    let options = `<option value="" disabled selected>Selecione um usuário</option>`;
     for (let usuario of lista) {
-        // monta a tag <option> com o nome do usuario como valor e texto
-        options += `<option value="${usuario.nome}">${usuario.nome}</option>`;
+        options += `<option value="${usuario.id_usuario}">${usuario.nome}</option>`;
     }
-
-    // adiciona as opcoes dentro do select na tela
-    document.getElementById("inputUsuario").innerHTML += options;
+    document.getElementById("inputUsuario").innerHTML = options;
 }
 
-function carregarLivro() {
-    // busca a lista de livros salvos no localstorage; se nao tiver nenhum, cria uma lista vazia
-    let lista = JSON.parse(localStorage.getItem("livros")) || [];
-    
-    // monta o html das opcoes do select com os titulos dos livros
-    let options = "";
-
-    for (let livro of lista) {
-        options += `<option value="${livro.titulo}">${livro.titulo}</option>`;
+async function carregarLivro() {
+    const retorno = await fetch("../php/livro_get.php");
+    const resposta = await retorno.json();
+    if (resposta.status == "ok") {
+        listarLivro(resposta.data);
     }
+}
 
-    document.getElementById("inputLivro").innerHTML += options;
+function listarLivro(lista) {
+    // Monta o HTML das opções do select com o id_livro no value e o título visível
+    let options = `<option value="" disabled selected>Selecione um livro</option>`;
+    for (let livro of lista) {
+        options += `<option value="${livro.id_livro}">${livro.titulo}</option>`;
+    }
+    document.getElementById("inputLivro").innerHTML = options;
 }
 
 function cancelar() {
-    // limpa os campos do formulario
+    // Limpa os campos do formulário
     document.getElementById("inputUsuario").value = "";
     document.getElementById("inputLivro").value = "";
     document.getElementById("inputResenha").value = "";
     document.getElementById("inputNota").value = "";
     document.getElementById("inputSpoiler").checked = false;
 
-    // limpa os botoes de alterar e cancelar da tela
+    // Limpa os botões de alterar e cancelar da tela
     document.getElementById("alterar").innerHTML = "";
     document.getElementById("cancelar").innerHTML = "";
 
-    // habilita novamente o botao de enviar para criar novas resenhas
-    document.getElementById("btnEnviar").disabled = false; 
+    // Habilita novamente o botão de enviar para criar novas resenhas
+    document.getElementById("btnEnviar").disabled = false;
 
-    // recarrega a lista de resenhas para mostrar a tela original
+    // Recarrega a lista de resenhas
     listar();
 }
