@@ -1,46 +1,75 @@
-// Pega a lista salva ou devolve uma array vazia, para que o código possa funcionar mesmo sem livros salvos
-function pegarLivros() {
-    return JSON.parse(localStorage.getItem("livros")) || [];
+// js/livros.js — CRUD de livros conectado ao PHP/MySQL (substitui a versão com localStorage)
+
+// Evita que um título com <script> seja executado dentro da tabela
+function esc(texto) {
+    const d = document.createElement("div");
+    d.textContent = texto ?? "";
+    return d.innerHTML;
 }
 
-// Guarda a lista do "pegar livros" no localStorage
-function guardarLivros(livros) {
-    localStorage.setItem("livros", JSON.stringify(livros));
+// Monta o FormData com os dados do formulário (usado no CREATE e no UPDATE)
+function montarFormData() {
+    const fd = new FormData();
+    fd.append("titulo", document.getElementById("titulo").value.trim());
+    fd.append("autor", document.getElementById("autor").value.trim());
+    fd.append("id_genero", document.getElementById("genero").value);
+    fd.append("paginas", document.getElementById("paginas").value);
+    fd.append("ano", document.getElementById("ano").value);
+    return fd;
+}
+
+// ----carrega os gêneros no <select> do formulário----
+async function carregarGeneros() {
+    const retorno = await fetch("../php/livros/livro_generos.php");
+    const resposta = await retorno.json();
+
+    let opcoes = "<option value=''>Selecione...</option>";
+
+    if (resposta.status == "ok") {
+        for (const g of resposta.data) {
+            opcoes += `<option value="${g.id_genero}">${esc(g.nome)}</option>`;
+        }
+    }
+
+    document.getElementById("genero").innerHTML = opcoes;
 }
 
 //  ----READ: mostra os livros na tabela----
-// Se não houver livros, mostra uma linha com a mensagem "Nenhum livro cadastrado"
-// Se houver livros, mostra uma linha para cada livro, com os botoes de Editar e Excluir
-function listar() {
-    const livros = pegarLivros();
+// Busca no PHP (livro_get.php). Se não houver livros, mostra a mensagem "Nenhum livro cadastrado"
+async function listar() {
+    const retorno = await fetch("../php/livros/livro_get.php");
+    const resposta = await retorno.json();
 
-    const linhas = livros.length === 0
-        ? "<tr><td colspan='6' class='text-center text-muted'>Nenhum livro cadastrado</td></tr>"
-        : livros.map(livro => `
+    let linhas;
+
+    if (resposta.status == "ok") {
+        linhas = resposta.data.map(livro => `
             <tr>
-                <td>${livro.titulo}</td>
-                <td>${livro.autor}</td>
-                <td>${livro.genero}</td>
-                <td>${livro.paginas}</td>
-                <td>${livro.ano}</td>
+                <td>${esc(livro.titulo)}</td>
+                <td>${esc(livro.autor)}</td>
+                <td>${esc(livro.genero)}</td>
+                <td>${esc(livro.paginas)}</td>
+                <td>${esc(livro.ano_publicacao)}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning me-1" onclick="editar(${livro.id})">Editar</button>
-                    <button class="btn btn-sm btn-danger" onclick="excluir(${livro.id})">Excluir</button>
+                    <button class="btn btn-sm btn-warning me-1" onclick="editar(${livro.id_livro})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="excluir(${livro.id_livro})">Excluir</button>
                 </td>
             </tr>`).join("");
+    } else {
+        linhas = "<tr><td colspan='6' class='text-center text-muted'>Nenhum livro cadastrado</td></tr>";
+    }
 
     document.getElementById("tabela").innerHTML = linhas;
 }
 
 // ----CREATE e UPDATE: botao Salvar----
-// Se o campo id estiver vazio, cria um novo livro (CREATE)
-// Se o campo id estiver preenchido, atualiza o livro existente (UPDATE)
-// Valida os campos antes de salvar
-function salvar() {
+// Se o campo id estiver vazio, cria um novo livro (livro_novo.php)
+// Se o campo id estiver preenchido, atualiza o livro existente (livro_alterar.php)
+async function salvar() {
     const id = document.getElementById("id").value;
     const titulo = document.getElementById("titulo").value.trim();
     const autor = document.getElementById("autor").value.trim();
-    const genero = document.getElementById("genero").value.trim();
+    const genero = document.getElementById("genero").value;
     const paginas = document.getElementById("paginas").value;
     const ano = document.getElementById("ano").value;
 
@@ -56,70 +85,65 @@ function salvar() {
         return;
     }
 
-    const livros = pegarLivros();
+    // CREATE: sem id, POST simples. UPDATE: id na URL + dados no body
+    const url = id === ""
+        ? "../php/livros/livro_novo.php"
+        : "../php/livros/livro_alterar.php?id=" + id;
 
-    // validacao: nao deixa salvar o mesmo livro duas vezes (mesmo titulo e mesmo autor)
-    const jaExiste = livros.some(livro =>
-        livro.titulo.toLowerCase() === titulo.toLowerCase() &&
-        livro.autor.toLowerCase() === autor.toLowerCase() &&
-        livro.id != id // na edicao, ignora o proprio livro
-    );
+    const retorno = await fetch(url, {
+        method: "POST",
+        body: montarFormData()
+    });
+    const resposta = await retorno.json();
 
-    if (jaExiste) {
-        alert("Este livro já está cadastrado!");
-        return;
-    }
-
-    if (id === "") {
-        // CREATE: nao tem id, entao e um livro novo
-        livros.push({
-            id: Date.now(),
-            titulo,
-            autor,
-            genero,
-            paginas: Number(paginas),
-            ano: Number(ano)
-        });
+    if (resposta.status == "ok") {
+        alert("SUCESSO: " + resposta.mensagem);
+        limpar();
+        listar();
     } else {
-        // UPDATE: tem id, entao muda os dados do livro que ja existe
-        const livro = livros.find(l => l.id == id);
-        Object.assign(livro, { titulo, autor, genero, paginas: Number(paginas), ano: Number(ano) });
+        alert("ERRO: " + resposta.mensagem);
     }
-
-    guardarLivros(livros);
-    limpar();
-    listar();
 }
 
 // ----UPDATE (parte 1): coloca os dados do livro no formulario----
-// Quando o usuário clica no botão editar, o id do livro é passado para essa função, que procura o livro na lista e coloca os dados nos campos do formulário
-// Se o livro não for encontrado, a função retorna sem fazer nada
-function editar(id) {
-    const livro = pegarLivros().find(l => l.id == id);
-    if (!livro) return;
+// Busca o livro pelo id (livro_get.php?id=X) e preenche os campos
+async function editar(id) {
+    const retorno = await fetch("../php/livros/livro_get.php?id=" + id);
+    const resposta = await retorno.json();
 
-    document.getElementById("id").value = livro.id;
+    if (resposta.status != "ok") {
+        alert("ERRO: " + resposta.mensagem);
+        return;
+    }
+
+    const livro = resposta.data[0];
+
+    document.getElementById("id").value = livro.id_livro;
     document.getElementById("titulo").value = livro.titulo;
     document.getElementById("autor").value = livro.autor;
-    document.getElementById("genero").value = livro.genero;
+    document.getElementById("genero").value = livro.id_genero;
     document.getElementById("paginas").value = livro.paginas;
-    document.getElementById("ano").value = livro.ano;
+    document.getElementById("ano").value = livro.ano_publicacao;
 
     window.scrollTo(0, 0); // sobe a pagina para mostrar o formulario
 }
 
 // ----DELETE: remove o livro----
-// Quando o usuário clica no botão excluir, o id do livro é passado para essa função que remove o livro da lista e atualiza a tabela
-function excluir(id) {
+// Chama livro_excluir.php?id=X e atualiza a tabela se deu certo
+async function excluir(id) {
     if (!confirm("Deseja excluir este livro?")) {
         return;
     }
 
-    const novaLista = pegarLivros().filter(livro => livro.id != id);
+    const retorno = await fetch("../php/livros/livro_excluir.php?id=" + id);
+    const resposta = await retorno.json();
 
-    guardarLivros(novaLista);
-    limpar(); // se estava editando esse livro, limpa o formulario
-    listar();
+    alert(resposta.mensagem);
+
+    if (resposta.status == "ok") {
+        limpar(); // se estava editando esse livro, limpa o formulario
+        listar();
+    }
 }
 
 // ----limpa o formulario (tambem usado pelo botao Cancelar)----
@@ -129,5 +153,6 @@ function limpar() {
     );
 }
 
-// ao abrir a pagina, mostra os livros salvos
+// ao abrir a pagina, carrega os generos e mostra os livros salvos
+carregarGeneros();
 listar();

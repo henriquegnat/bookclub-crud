@@ -10,71 +10,72 @@
 
 <!-- menu -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="../index.html">BookClub</a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="../index.html">Início</a>
-            <a class="nav-link" href="usuarios.html">Usuários</a>
-            <!-- esse fica marcado como ativo porque estamos nele -->
-            <a class="nav-link active" href="livros.html">Livros</a>
-            <a class="nav-link" href="generos.html">Gêneros</a>
-            <a class="nav-link" href="clubes.html">Clubes</a>
-            <a class="nav-link" href="resenhas.html">Resenhas</a>
-        </div>
-    </div>
+<div class="container">
+<a class="navbar-brand fw-bold" href="../index.html">BookClub</a>
+<div class="navbar-nav ms-auto">
+<a class="nav-link" href="../index.html">Início</a>
+<a class="nav-link" href="usuarios.html">Usuários</a>
+<!-- esse fica marcado como ativo porque estamos nele -->
+<a class="nav-link active" href="livros.html">Livros</a>
+<a class="nav-link" href="generos.html">Gêneros</a>
+<a class="nav-link" href="clubes.html">Clubes</a>
+<a class="nav-link" href="resenhas.html">Resenhas</a>
+</div>
+</div>
 </nav>
 
 <div class="container py-4">
-    <h2 class="mb-4">Livros</h2>
+<h2 class="mb-4">Livros</h2>
 
-    <!-- formulario (usado para cadastrar e editar) -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <!-- guarda o id do livro que esta sendo editado (vazio = novo livro) -->
-            <input type="hidden" id="id">
+<!-- formulario (usado para cadastrar e editar) -->
+<div class="card mb-4">
+<div class="card-body">
+<!-- guarda o id do livro que esta sendo editado (vazio = novo livro) -->
+<input type="hidden" id="id">
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Título</label>
-                    <input type="text" class="form-control" id="titulo">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Autor</label>
-                    <input type="text" class="form-control" id="autor">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Gênero</label>
-                    <input type="text" class="form-control" id="genero">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Páginas</label>
-                    <input type="number" class="form-control" id="paginas" min="1">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Ano</label>
-                    <input type="number" class="form-control" id="ano">
-                </div>
-            </div>
+<div class="row g-3">
+<div class="col-md-6">
+<label class="form-label">Título</label>
+<input type="text" class="form-control" id="titulo">
+</div>
+<div class="col-md-6">
+<label class="form-label">Autor</label>
+<input type="text" class="form-control" id="autor">
+</div>
+<div class="col-md-4">
+<label class="form-label">Gênero</label>
+<!-- agora é um select: as opções vêm da tabela genero (preenchido pelo livros.js) -->
+<select class="form-select" id="genero"></select>
+</div>
+<div class="col-md-4">
+<label class="form-label">Páginas</label>
+<input type="number" class="form-control" id="paginas" min="1">
+</div>
+<div class="col-md-4">
+<label class="form-label">Ano</label>
+<input type="number" class="form-control" id="ano">
+</div>
+</div>
 
-            <button type="button" class="btn btn-primary mt-3" onclick="salvar()">Salvar</button>
-            <button type="button" class="btn btn-secondary mt-3" onclick="limpar()">Cancelar</button>
-        </div>
-    </div>
+<button type="button" class="btn btn-primary mt-3" onclick="salvar()">Salvar</button>
+<button type="button" class="btn btn-secondary mt-3" onclick="limpar()">Cancelar</button>
+</div>
+</div>
 
-    <!-- tabela -->
-    <table class="table table-striped bg-white">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Autor</th>
-                <th>Gênero</th>
-                <th>Páginas</th>
-                <th>Ano</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody id="tabela"></tbody>
-    </table>
+<!-- tabela -->
+<table class="table table-striped bg-white">
+<thead>
+<tr>
+<th>Título</th>
+<th>Autor</th>
+<th>Gênero</th>
+<th>Páginas</th>
+<th>Ano</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody id="tabela"></tbody>
+</table>
 </div>
 
 <script src="../js/livros.js"></script>
