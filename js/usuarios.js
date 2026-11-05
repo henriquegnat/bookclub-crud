@@ -1,157 +1,75 @@
-// CREATE - CADASTRO DE UM NOVO LEITOR
-document.getElementById("btn_adicionar").addEventListener("click", () => {
+// CRUD de Usuários: front-end -> PHP -> MySQL.
+const base = '../php/usuarios/';
+const corpo = document.getElementById('lista_usuarios');
+const campo = id => document.getElementById(id);
+let selecionado = null;
 
-    // Pega os valores digitados nos campos do HTML
-    let nome = document.getElementById("nome").value;
-    let email = document.getElementById("email").value;
-    let meta_leitura = document.getElementById("meta_leitura").value;
-
-    // VALIDAÇÃO - verifica se algum campo está vazio
-    if(nome == "" || email == "" || meta_leitura == ""){
-        alert("Preencha todos os campos.");
-        return;
-    }
-
-    // Recupera a lista que está no localStorage
-    // getItem pega os dados e JSON.parse transforma em objeto JavaScript
-    let lista = JSON.parse(localStorage.getItem("usuarios"));
-
-    // Se ainda não existir uma lista, cria uma lista vazia
-    if(!lista){
-        lista = [];
-    }
-
-    // CREATE - cria o usuário e adiciona na lista
-    lista.push({
-        id: lista.length + 1,
-        nome: nome,
-        email: email,
-        meta_leitura: meta_leitura
-    });
-
-    // SALVAR NO LOCALSTORAGE
-    // JSON.stringify transforma a lista em texto para ser armazenada
-    localStorage.setItem("usuarios", JSON.stringify(lista));
-
-    limparCampos();
-
-    // Atualiza a tabela depois do cadastro
-    listar();
+async function requisitar(arquivo, dados = null) {
+    const opcoes = dados ? {method:'POST', body:dados} : {};
+    const resposta = await fetch(base + arquivo, opcoes);
+    const json = await resposta.json();
+    if (json.status !== 'ok') throw new Error(json.mensagem);
+    return json;
+}
+function formulario() {
+    const dados = new FormData();
+    for (const id of ['nome','email','meta_leitura']) dados.append(id,campo(id).value.trim());
+    return dados;
+}
+function limpar() {
+    for (const id of ['nome','email','meta_leitura']) campo(id).value='';
+    selecionado=null;
+    campo('alterar').replaceChildren();
+    campo('btn_adicionar').disabled=false;
+}
+async function listar() {
+    try {
+        const resultado = await requisitar('usuario_get.php');
+        corpo.replaceChildren();
+        for (const usuario of resultado.data) {
+            const linha=document.createElement('tr');
+            for (const chave of ['id_usuario','nome','email','meta_leitura']) {
+                const celula=document.createElement('td');
+                celula.textContent=usuario[chave];
+                linha.appendChild(celula);
+            }
+            const acoes=document.createElement('td');
+            const editar=document.createElement('button');
+            editar.textContent='Carregar'; editar.className='btn btn-secondary btn-sm me-2';
+            editar.addEventListener('click',()=>carregar(usuario));
+            const apagar=document.createElement('button');
+            apagar.textContent='Excluir'; apagar.className='btn btn-danger btn-sm';
+            apagar.addEventListener('click',()=>excluir(usuario.id_usuario));
+            acoes.append(editar,apagar); linha.appendChild(acoes); corpo.appendChild(linha);
+        }
+    } catch (erro) { alert('Erro ao listar: '+erro.message); }
+}
+function carregar(usuario) {
+    selecionado=usuario.id_usuario;
+    for (const chave of ['nome','email','meta_leitura']) campo(chave).value=usuario[chave];
+    campo('btn_adicionar').disabled=true;
+    const botao=document.createElement('button');
+    botao.textContent='Salvar alteração';botao.className='btn btn-warning me-2';
+    botao.addEventListener('click',alterar);
+    const cancelar=document.createElement('button');
+    cancelar.textContent='Cancelar';cancelar.className='btn btn-outline-secondary';
+    cancelar.addEventListener('click',limpar);
+    campo('alterar').replaceChildren(botao,cancelar);
+}
+async function alterar() {
+    if (selecionado===null) return;
+    const dados=formulario();dados.append('id_usuario',selecionado);
+    try { const r=await requisitar('usuario_alterar.php',dados); alert(r.mensagem);limpar();await listar(); }
+    catch(erro){alert(erro.message);}
+}
+async function excluir(id) {
+    if (!confirm('Deseja realmente excluir este leitor?')) return;
+    const dados=new FormData();dados.append('id_usuario',id);
+    try { const r=await requisitar('usuario_excluir.php',dados);alert(r.mensagem);limpar();await listar(); }
+    catch(erro){alert(erro.message);}
+}
+campo('btn_adicionar').addEventListener('click',async()=>{
+    try { const r=await requisitar('usuario_novo.php',formulario());alert(r.mensagem);limpar();await listar(); }
+    catch(erro){alert(erro.message);}
 });
-
-
-// READ - LISTAGEM DOS LEITORES
-function listar(){
-
-    // Recupera os usuários salvos
-    let lista = JSON.parse(localStorage.getItem("usuarios"));
-
-    if(!lista){
-        lista = [];
-    }
-
-    // Limpa a tabela antes de mostrar novamente
-    document.getElementById("lista_usuarios").innerHTML = "";
-
-    let indice = 0;
-
-    // Percorre a lista de usuários
-    for(let usuario of lista){
-
-        // Mostra cada usuário na tabela
-        document.getElementById("lista_usuarios").innerHTML += `
-        <tr>
-            <td>${usuario.id}</td>
-            <td>${usuario.nome}</td>
-            <td>${usuario.email}</td>
-            <td>${usuario.meta_leitura}</td>
-            <td>
-                <button class="btn btn-secondary btn-sm" onclick="carregar(${indice})">Carregar</button>
-                <button class="btn btn-danger btn-sm" onclick="excluir(${indice})">Excluir</button>
-            </td>
-        </tr>`;
-
-        indice++;
-    }
-}
-
-
-// DELETE - EXCLUSÃO DE UM LEITOR
-function excluir(indice){
-
-    // Recupera a lista do localStorage
-    let lista = JSON.parse(localStorage.getItem("usuarios"));
-
-    // Remove o usuário da posição recebida
-    lista.splice(indice, 1);
-
-    // Salva novamente a lista depois da exclusão
-    localStorage.setItem("usuarios", JSON.stringify(lista));
-
-    // Atualiza a tabela
-    listar();
-}
-
-
-// CARREGAR DADOS PARA EDIÇÃO
-function carregar(indice){
-
-    let lista = JSON.parse(localStorage.getItem("usuarios"));
-
-    // Coloca os dados do usuário novamente nos campos
-    document.getElementById("nome").value = lista[indice].nome;
-    document.getElementById("email").value = lista[indice].email;
-    document.getElementById("meta_leitura").value = lista[indice].meta_leitura;
-
-    // Cria o botão que confirma a alteração
-    document.getElementById("alterar").innerHTML = `
-        <button class="btn btn-warning" onclick="alterar(${indice})">Alterar</button>`;
-}
-
-
-// UPDATE - ALTERAÇÃO DE UM LEITOR
-function alterar(indice){
-
-    // Recupera a lista
-    let lista = JSON.parse(localStorage.getItem("usuarios"));
-
-    // Pega os novos valores dos campos
-    let nome = document.getElementById("nome").value;
-    let email = document.getElementById("email").value;
-    let meta_leitura = document.getElementById("meta_leitura").value;
-
-    // VALIDAÇÃO
-    if(nome == "" || email == "" || meta_leitura == ""){
-        alert("Preencha todos os campos.");
-        return;
-    }
-
-    // Altera os dados do usuário escolhido
-    lista[indice].nome = nome;
-    lista[indice].email = email;
-    lista[indice].meta_leitura = meta_leitura;
-
-    // Salva a lista alterada no localStorage
-    localStorage.setItem("usuarios", JSON.stringify(lista));
-
-    // Remove o botão Alterar
-    document.getElementById("alterar").innerHTML = "";
-
-    limparCampos();
-
-    // Atualiza a tabela
-    listar();
-}
-
-
-// LIMPA OS CAMPOS DEPOIS DO CADASTRO OU ALTERAÇÃO
-function limparCampos(){
-
-    document.getElementById("nome").value = "";
-    document.getElementById("email").value = "";
-    document.getElementById("meta_leitura").value = "";
-}
-
-
-// Quando a página é aberta, mostra os usuários que já estão salvos
 listar();
