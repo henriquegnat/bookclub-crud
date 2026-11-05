@@ -37,7 +37,7 @@ async function salvarResenha() {
     fd.append("contem_spoiler", spoiler);
 
     // Envia a requisição POST com fetch() para o PHP
-    const retorno = await fetch("../php/resenha_novo.php", {
+    const retorno = await fetch("../php/resenha/resenha_novo.php", {
         method: "POST",
         body: fd
     });
@@ -66,7 +66,7 @@ async function salvarResenha() {
 // Faz um fetch GET simples para resenha_get.php e monta os cards na tela
 // ============================================================================
 async function listar() {
-    const retorno = await fetch("../php/resenha_get.php");
+    const retorno = await fetch("../php/resenha/resenha_get.php");
     const resposta = await retorno.json();
 
     const containerCards = document.getElementById("card-resenha");
@@ -128,7 +128,12 @@ async function listar() {
 // Chama resenha_excluir.php passando o ID na URL (?id=X)
 // ============================================================================
 async function excluir(id) {
-    const retorno = await fetch("../php/resenha_excluir.php?id=" + id);
+    // Pergunta ao usuário se ele realmente deseja excluir; se clicar em "Cancelar", para a função
+    if (!confirm("Tem certeza que deseja excluir esta resenha?")) {
+        return;
+    }
+
+    const retorno = await fetch("../php/resenha/resenha_excluir.php?id=" + id);
     const resposta = await retorno.json();
 
     alert(resposta.mensagem);
@@ -145,7 +150,7 @@ async function excluir(id) {
 // Busca o registro pelo ID na URL (resenha_get.php?id=X) e preenche o formulário
 // ============================================================================
 async function carregar(id) {
-    const retorno = await fetch("../php/resenha_get.php?id=" + id);
+    const retorno = await fetch("../php/resenha/resenha_get.php?id=" + id);
     const resposta = await retorno.json();
 
     if (resposta.status == "ok") {
@@ -184,7 +189,7 @@ async function alterar(id) {
     fd.append("contem_spoiler", document.getElementById("inputSpoiler").checked ? 1 : 0);
 
     // ID na URL + dados no body (exatamente como na página 19 da apostila)
-    const retorno = await fetch("../php/resenha_alterar.php?id=" + id, {
+    const retorno = await fetch("../php/resenha/resenha_alterar.php?id=" + id, {
         method: "POST",
         body: fd
     });
@@ -218,7 +223,7 @@ async function alterar(id) {
 // FUNÇÕES AUXILIARES — Carregar Usuários e Livros nos <select>
 // ============================================================================
 async function carregarUsuario() {
-    const retorno = await fetch("../php/usuario_get.php");
+    const retorno = await fetch("../php/resenha/usuario_get.php");
     const resposta = await retorno.json();
     if (resposta.status == "ok") {
         listarUsuario(resposta.data);
@@ -235,7 +240,7 @@ function listarUsuario(lista) {
 }
 
 async function carregarLivro() {
-    const retorno = await fetch("../php/livro_get.php");
+    const retorno = await fetch("../php/resenha/livro_get.php");
     const resposta = await retorno.json();
     if (resposta.status == "ok") {
         listarLivro(resposta.data);
