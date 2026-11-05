@@ -1,7 +1,7 @@
 # 📚 BookClub — Plataforma de Gestão Literária e Comunidade de Leitura
 
-> **Atividade Prática – Desenvolvimento de Aplicação Web**  
-> Aplicação dos conceitos de front-end e operações fundamentais de CRUD utilizando o `LocalStorage` do navegador para persistência de dados.
+> **Atividade Prática – Desenvolvimento de Aplicação Web (Módulo III)**  
+> Persistência em Banco de Dados: **FRONT > BACK > BANCO** utilizando **HTML, CSS, JavaScript (`fetch` + `FormData`), PHP (MySQLi com Prepared Statements) e MySQL**.
 
 ---
 
@@ -9,74 +9,116 @@
 
 O **BookClub** é uma aplicação web funcional e interativa concebida para incentivar hábitos de leitura, catalogação de obras e engajamento em comunidades literárias. 
 
-O projeto conecta diretamente o modelo conceitual desenvolvido na disciplina de **Banco de Dados** com a disciplina de **Desenvolvimento Web**, demonstrando na prática o ciclo de vida completo da informação no ambiente de front-end.
+O projeto integra diretamente o modelo lógico e físico desenvolvido na disciplina de **Banco de Dados** com a arquitetura em três camadas da disciplina de **Desenvolvimento Web**, armazenando todos os registros de forma persistente no **MySQL** (via XAMPP/phpMyAdmin).
 
 ---
 
-## 🎯 2. Objetivos Acadêmicos
+## 🏗️ 2. Arquitetura: FRONT > BACK > BANCO
 
-* **Operações CRUD Completas**: Implementar de forma 100% funcional as 4 operações fundamentais para cada entidade:
-  * **C (Create)**: Cadastro de novos registros via formulários validados;
-  * **R (Read)**: Consulta e listagem dinâmica dos registros em tabela;
-  * **U (Update)**: Edição e atualização de registros existentes;
-  * **D (Delete)**: Exclusão controlada de registros.
-* **Persistência Client-Side com LocalStorage**:
-  * Utilização de listas de objetos em JavaScript;
-  * Serialização com `JSON.stringify()` e armazenamento via `localStorage.setItem()`;
-  * Recuperação via `localStorage.getItem()` e conversão com `JSON.parse()`.
-* **Organização e Domínio**: Cada integrante do grupo é responsável por um CRUD completo, demonstrando domínio total do código para a banca.
-* **Interface Amigável e Responsiva**: Construída com **Bootstrap 5**, proporcionando clareza visual, facilidade de uso e elegância sem complexidade desnecessária.
+A aplicação segue a estrutura em três camadas apresentada no Módulo III (Aulas 7, 8 e 9), onde o front-end nunca acessa o banco de dados diretamente:
+
+| Camada | Tecnologia | Responsabilidade |
+| :--- | :--- | :--- |
+| **FRONT** | HTML5, CSS3, Bootstrap 5 e JavaScript (`fetch` + `FormData`) | Exibir a interface, capturar os dados digitados, enviar a requisição ao PHP e atualizar a tela com o resultado. |
+| **BACK** | PHP 8+ com extensão **MySQLi** | Receber a requisição (`$_POST` e `$_GET`), validar os dados, executar os comandos SQL com **Prepared Statements** (`prepare`, `bind_param`, `execute`) e devolver a resposta padronizada em JSON (`{ status, mensagem, data }`). |
+| **BANCO** | MySQL / MariaDB (XAMPP / phpMyAdmin) | Armazenar os dados de forma persistente nas tabelas relacionais do banco `bookclub`. |
 
 ---
 
-## 👥 3. Divisão dos Módulos (1 Integrante = 1 CRUD)
+## 🎯 3. Objetivos Acadêmicos Atendidos
 
-| Módulo / CRUD | Entidade | Responsável | Descrição |
-| :--- | :---: | :---: | :--- |
-| **1. Gêneros Literários** | `GENERO` | *Julia Moura Ruela* | CRUD e categorização de gêneros (Fantasia, Ficção, Romance, etc.). |
-| **2. Leitores (Usuários)** | `USUARIO` | *Yasmin Luz de Araújo* | CRUD de perfis de leitores, e-mails e metas anuais de leitura. |
-| **3. Catálogo de Livros** | `LIVRO` | *Leticia Hellen Prata de Souza* | CRUD de livros de acervo com título, autor, gênero, páginas e ano de publicação. |
-| **4. Clubes de Leitura** | `CLUBE` | *Sabrina Bernardi Ferreira* | CRUD de clubes de leitura com nome, tema e líder responsável. |
-| **5. Avaliações & Resenhas**| `RESENHA` | *Henrique Gnatkovski de Almeida* | CRUD de resenhas críticas, com usuário, livro, nota e spoiler|
-
----
-
-## 📋 4. Detalhamento das Entidades e Atributos
-
-### 📚 Módulo 1: Gêneros Literários (`GENERO`)
-* **Campos**: `id`, `nome`, `descricao`
-* **Funcionalidade**: Responsável pela classificação temática das obras e direcionamento dos interesses dos clubes.
-
-### 👤 Módulo 2: Leitores / Usuários (`USUARIO`)
-* **Campos**: `id`, `nome`, `email`, `meta_leitura`
-* **Funcionalidade**: Manutenção dos dados dos leitores da comunidade e acompanhamento de metas literárias anuais.
-
-### 📖 Módulo 3: Catálogo de Livros (`LIVRO`)
-* **Campos**: `id`, `titulo`, `autor`, `genero`, `paginas`, `ano`
-* **Funcionalidade**: Cadastro central de títulos literários que alimentam as discussões dos clubes e as avaliações.
-
-### 👥 Módulo 4: Clubes de Leitura (`CLUBE`)
-* **Campos**: `id`, `nome_clube`, `tema`, `status` (Ativo/Em Pausa/Encerrado)
-* **Funcionalidade**: Criação e gestão de grupos temáticos com acompanhamento de status.
-
-### ⭐ Módulo 5: Avaliações & Resenhas (`RESENHA`)
-* **Campos**: `id`, `livro`, `leitor`, `nota` (1 a 5), `texto_resenha`, `recomenda` (Sim/Não)
-* **Funcionalidade**: Registro das impressões de leitura, notas avaliativas e recomendações de livros para a comunidade.
+* **Operações CRUD Completas de Ponta a Ponta**:
+  * **C (Create)**: Cadastro de novos registros via `fetch(..., { method: 'POST', body: FormData })` → `INSERT INTO`;
+  * **R (Read)**: Consulta e listagem dinâmica dos registros via `fetch()` GET → `SELECT` (com `INNER JOIN` nas chaves estrangeiras);
+  * **U (Update)**: Busca do registro por ID (`?id=X`) e atualização via `FormData` → `UPDATE ... WHERE id = ?`;
+  * **D (Delete)**: Exclusão controlada com confirmação do usuário → `DELETE FROM ... WHERE id = ?`.
+* **Segurança e Padronização**:
+  * Uso de **Prepared Statements** (`prepare()` e `bind_param()`) em todas as operações que recebem dados do usuário, prevenindo **SQL Injection**;
+  * Conexão centralizada em arquivo `conexao.php` incluído via `include_once()`;
+  * Retorno padronizado em JSON com `json_encode(['status' => 'ok'|'nok', 'mensagem' => '...', 'data' => [...]])`.
 
 ---
 
-## 💻 5. Tecnologias Utilizadas
+## 👥 4. Divisão dos Módulos (1 Integrante = 1 CRUD)
 
-* **HTML5**: Estruturação semântica das páginas e formulários;
-* **CSS3**: Estilização complementar e refinamentos de layout;
-* **Bootstrap 5**: Framework CSS para componentes (Navbar, Modais, Cards, Tabelas e Grid responsivo);
-* **JavaScript (ES6+) Nativo**: Lógica de manipulação de DOM, eventos e persistência via LocalStorage, sem frameworks pesados.
+| Módulo / CRUD | Tabela MySQL | Responsável | Descrição |
+| :--- | :---: | :--- | :--- |
+| **1. Gêneros Literários** | `genero` | *Julia Moura Ruela* | CRUD e categorização de gêneros literários (Fantasia, Ficção Científica, Romance, etc.). |
+| **2. Leitores (Usuários)** | `usuario` | *Yasmin Luz de Araújo* | CRUD de perfis de leitores, e-mails, datas de cadastro e metas anuais de leitura. |
+| **3. Catálogo de Livros** | `livro` | *Leticia Hellen Prata de Souza* | CRUD de livros do acervo com título, autor, gênero (`id_genero`), páginas e ano de publicação. |
+| **4. Clubes de Leitura** | `clube` | *Sabrina Bernardi Ferreira* | CRUD de clubes de leitura com nome, tema, código de acesso, capacidade, status e criador. |
+| **5. Avaliações & Resenhas**| `resenha` | *Henrique Gnatkovski de Almeida* | CRUD de resenhas críticas com leitor (`id_usuario`), livro (`id_livro`), nota (1 a 5), alerta de spoiler (`contem_spoiler`) e data de publicação automática (`data_publicacao`). |
 
 ---
 
-## 🚀 6. Como Executar a Aplicação
+## 📋 5. Detalhamento das Tabelas e Atributos dos CRUDs
 
-1. Clone ou baixe este repositório.
-2. Abra a pasta do projeto.
-3. Abra o arquivo `index.html` diretamente em qualquer navegador web moderno (Google Chrome, Firefox, Microsoft Edge).
-4. **Dica de Teste**: Para verificar o funcionamento do `LocalStorage` do zero, teste em uma janela anônima ou limpe os dados do navegador através do DevTools (`F12` > *Application* > *Local Storage*).
+### 📚 Módulo 1: Gêneros Literários (`genero`)
+* **Colunas**: `id_genero` (PK), `nome`, `descricao`
+* **Funcionalidade**: Classificação temática das obras literárias cadastradas no catálogo.
+
+### 👤 Módulo 2: Leitores / Usuários (`usuario`)
+* **Colunas**: `id_usuario` (PK), `nome`, `email`, `meta_leitura`, `data_cadastro`
+* **Funcionalidade**: Gestão dos leitores da comunidade e acompanhamento de metas literárias anuais.
+
+### 📖 Módulo 3: Catálogo de Livros (`livro`)
+* **Colunas**: `id_livro` (PK), `titulo`, `autor`, `id_genero` (FK), `paginas`, `ano_publicacao`
+* **Funcionalidade**: Cadastro central de títulos literários que alimentam os clubes e as resenhas.
+
+### 👥 Módulo 4: Clubes de Leitura (`clube`)
+* **Colunas**: `id_clube` (PK), `nome_clube`, `tema`, `codigo`, `capacidade_max`, `status` (`Ativo`, `Em Pausa`, `Encerrado`), `data_criacao`, `id_criador` (FK)
+* **Funcionalidade**: Criação e administração de grupos temáticos de leitura.
+
+### ⭐ Módulo 5: Avaliações & Resenhas (`resenha`)
+* **Colunas**: `id_resenha` (PK), `id_usuario` (FK), `id_livro` (FK), `nota` (1 a 5), `texto_resenha`, `contem_spoiler` (`0` ou `1`), `data_publicacao` (gerada automaticamente no PHP com `date('Y-m-d')`)
+* **Funcionalidade**: Publicação de resenhas com filtro visual de desfoque (`blur`) para textos marcados com spoiler.
+
+---
+
+## 📂 6. Estrutura de Pastas do Projeto
+
+```text
+BookClub/
+├── index.html          # Página inicial com menu de navegação e atalhos
+├── css/
+│   └── style.css       # Estilos globais complementares ao Bootstrap 5
+├── home/               # Páginas HTML de cada módulo do sistema
+│   ├── clubes.html
+│   ├── generos.html
+│   ├── livros.html
+│   ├── resenhas.html
+│   └── usuarios.html
+├── js/                 # Scripts Front-end (fetch + FormData + manipulação de DOM)
+│   ├── clubes.js
+│   ├── generos.js
+│   ├── livros.js
+│   ├── resenhas.js
+│   └── usuarios.js
+└── php/                # Scripts Back-end em PHP (MySQLi + Prepared Statements + JSON)
+    ├── clube/
+    ├── generos/
+    ├── leitores/
+    ├── livros/
+    └── resenha/
+        ├── conexao.php
+        ├── resenha_get.php
+        ├── resenha_novo.php
+        ├── resenha_alterar.php
+        ├── resenha_excluir.php
+        ├── usuario_get.php
+        └── livro_get.php
+```
+
+---
+
+## 🚀 7. Como Executar a Aplicação no XAMPP
+
+1. **Inicie os serviços no XAMPP Control Panel**:
+   * Inicie os módulos **Apache** e **MySQL**.
+2. **Importe o Banco de Dados**:
+   * Acesse `http://localhost/phpmyadmin` no navegador;
+   * Crie o banco de dados **`bookclub`** (ou importe diretamente o arquivo `bookclub.sql` com as tabelas e registros de exemplo).
+3. **Coloque o projeto na pasta `htdocs`**:
+   * Certifique-se de que a pasta do projeto esteja em `C:\xampp\htdocs\BookClub` (ou `D:\xampp\htdocs\BookClub`).
+4. **Acesse pelo navegador**:
+   * Abra **`http://localhost/BookClub/index.html`** em qualquer navegador (Chrome, Edge, Firefox ou janela anônima — como os dados estão no MySQL, eles permanecem salvos em qualquer navegador!).
