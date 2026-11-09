@@ -6,7 +6,7 @@
 // O ID vem pela URL ($_GET['id']). Verificamos se o ID foi informado antes de executar.
 // ============================================================================
 
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];
 

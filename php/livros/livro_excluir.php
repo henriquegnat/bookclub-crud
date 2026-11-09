@@ -1,5 +1,5 @@
 <?php // php/livro_excluir.php — DELETE
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];
 

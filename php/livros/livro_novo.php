@@ -1,5 +1,5 @@
 <?php // php/livros/livro_novo.php
-include_once('../conexao.php');
+require_once __DIR__ . '/../conexao.php';
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];
 
 $titulo = trim($_POST['titulo'] ?? '');

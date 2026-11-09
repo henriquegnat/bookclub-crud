@@ -7,7 +7,7 @@
 //   2) Com ?id=X na URL: retorna apenas uma resenha (usado na Fase 1 do alterar)
 // ============================================================================
 
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
 // Padrão de retorno — definido no início de TODOS os arquivos PHP (Seção 7.7)
 $retorno = [

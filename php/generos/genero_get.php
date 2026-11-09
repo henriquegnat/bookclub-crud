@@ -1,5 +1,5 @@
 <?php // php/genero_get.php
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];
 
 // Dois comportamentos num único arquivo:

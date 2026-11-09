@@ -1,5 +1,5 @@
 <?php // php/livros/livro_get.php
-include_once('../conexao.php');
+require_once __DIR__ . '/../conexao.php';
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];
 
 $sql = 'SELECT l.*, g.nome AS genero

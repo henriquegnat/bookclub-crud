@@ -10,7 +10,7 @@ function escapar(texto) {
 
 async function carregarUsuarios() {
     try {
-        const retorno = await fetch("../PHP/usuario_get.php");
+        const retorno = await fetch("../php/clube/usuario_get.php");
         const resposta = await retorno.json();
         usuariosCache = resposta.status == "ok" ? resposta.data : [];
     } catch (erro) {
@@ -33,7 +33,7 @@ function nomeUsuario(id) {
 
 async function listar() {
     try {
-        const retorno = await fetch("../PHP/clube_get.php");
+        const retorno = await fetch("../php/clube/clube_get.php");
         const resposta = await retorno.json();
         clubesCache = resposta.status == "ok" ? resposta.data : [];
     } catch (erro) {
@@ -86,9 +86,9 @@ async function salvar() {
     fd.append("id_criador", id_criador); 
 
     
-    let url = "../PHP/cadastrar_clube.php";
+    let url = "../php/clube/cadastrar_clube.php";
     if (id !== "") {
-        url = "../PHP/alterar_clube.php?id=" + id;
+        url = "../php/clube/alterar_clube.php?id=" + id;
     }
 
     try {
@@ -131,7 +131,7 @@ async function excluir(id) {
     }
 
     try {
-        const retorno = await fetch("../PHP/excluir_clube.php?id=" + id);
+        const retorno = await fetch("../php/clube/excluir_clube.php?id=" + id);
         const resposta = await retorno.json();
         alert(resposta.mensagem);
 

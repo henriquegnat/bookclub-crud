@@ -1,7 +1,7 @@
 <?php
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
-$retorno = ['status' => '', 'mensagem' => '', 'data' => []];
+$retorno = ['status' => 'ok', 'mensagem' => '', 'data' => []];
 
 $stmt = $conexao->prepare('SELECT * FROM usuario');
 $stmt->execute();
@@ -13,7 +13,6 @@ while ($linha = $resultado->fetch_assoc()) {
 }
 
 if (count($linhas) > 0) {
-   
     $colunas = array_keys($linhas[0]);
 
     $colId = $colunas[0];
@@ -35,8 +34,9 @@ if (count($linhas) > 0) {
     $retorno['mensagem'] = 'Consulta efetuada.';
     $retorno['data']     = $tabela;
 } else {
-    $retorno['status']   = 'nok';
+    $retorno['status']   = 'ok';
     $retorno['mensagem'] = 'Nao ha registros';
+    $retorno['data']     = [];
 }
 
 $stmt->close();

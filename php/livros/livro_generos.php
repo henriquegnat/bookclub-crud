@@ -1,5 +1,5 @@
 <?php // php/livro_generos.php — lista os gêneros para preencher o <select> do formulário
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];
 

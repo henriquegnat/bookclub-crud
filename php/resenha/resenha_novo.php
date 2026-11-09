@@ -6,7 +6,7 @@
 // data de publicação automaticamente e verifica o affected_rows.
 // ============================================================================
 
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
 // Padrão de retorno do projeto
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];

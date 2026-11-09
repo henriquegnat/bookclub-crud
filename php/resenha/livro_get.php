@@ -1,5 +1,5 @@
 <?php
-    include_once('conexao.php');
+    require_once __DIR__ . '/../conexao.php';
     // Configurando o padrão de retorno em todas
     // as situações
     $retorno = [

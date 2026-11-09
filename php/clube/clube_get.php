@@ -1,7 +1,7 @@
 <?php
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
-$retorno = ['status' => '', 'mensagem' => '', 'data' => []];
+$retorno = ['status' => 'ok', 'mensagem' => '', 'data' => []];
 
 if (isset($_GET['id'])) {
     $stmt = $conexao->prepare('SELECT * FROM clube WHERE id_clube = ?');
@@ -23,8 +23,9 @@ if ($resultado->num_rows > 0) {
     $retorno['mensagem'] = 'Consulta efetuada.';
     $retorno['data']     = $tabela;
 } else {
-    $retorno['status']   = 'nok';
+    $retorno['status']   = 'ok';
     $retorno['mensagem'] = 'Nao ha registros';
+    $retorno['data']     = [];
 }
 
 $stmt->close();

@@ -1,5 +1,5 @@
 <?php // php/livro_alterar.php — UPDATE (id na URL, dados no POST)
-include_once('conexao.php');
+require_once __DIR__ . '/../conexao.php';
 
 $retorno = ['status' => '', 'mensagem' => '', 'data' => []];
 

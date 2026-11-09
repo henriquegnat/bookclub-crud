@@ -1,5 +1,5 @@
 <?php
-include_once("conexao.php");
+require_once __DIR__ . '/../conexao.php';
 $retorno = [
     'status'   => '', // ok - nok
     'mensagem' => '', // mensagem de envio para o front
